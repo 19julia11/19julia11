@@ -9,26 +9,42 @@ import turtle
 import random
 import math
 
-
 class Game(turtle.Turtle):
-	def update_score(self):
-		self.clear()
-		self.write("Score: {}".format(self.score), False, align = "left", font = ("Arial", 14, "normal"))
-		
-	def change_score(self, points):
-		self.score += points
-		self.update_score()
+	pass
+	#def change_score(self, points):
+	#	self.score += points
+	#	self.update_score()
+	#	score_label.update("Score: {}".format(change_score))
 		
 # Create Classes
 class Player(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
+		self.score = 0
+		self.frame = 0
+		self.y_acceleration = 5
+		self.y_speed = 5
+		self.strength = 7
+		self.score
+		self.state = "running"
         
 	def jump(self):
-		pass
-		
-	def turn_left(self):
-		self.left(20)
+		if self.state == "running":
+			self.y_acceleration += self.strength
+			self.sety(0)
+			self.state = "jumping"
+	
+	def tick(self):
+		self.setx(self.xcor())
+		if self.ycor() < -100:
+			self.y_acceleration = 0
+			self.y_speed = 0
+			self.sety(-100)
+			self.state = "running"
+			
+		self.y_acceleration += game.gravity
+		self.y_speed += self.y_acceleration
+		self.sety(self.ycor() + self.y_speed)
 		    	
 	def move_left(self):
 		self.fd(-10)
@@ -55,8 +71,7 @@ class Player(spgl.Sprite):
     		#return True
     	#else:
     		#return False
-
-    	
+    		
 class Dog(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
@@ -81,6 +96,7 @@ class House(spgl.Sprite):
 
 # Initial Game setup
 game = spgl.Game(800, 600, "black", "The Math Quest", 0)
+game.gravity = -0.9
 
 # Create Sprites
 # Create Person
@@ -98,6 +114,7 @@ house = House("square", "slategrey", 350, 0)
 house.shapesize(4, 1.5, 0)
 
 # Create Labels
+score_label = spgl.Label("Score: 0", "white", -380, 280)
 
 # Create Buttons
 
@@ -106,27 +123,35 @@ game.set_keyboard_binding(spgl.KEY_SPACE, player.jump)
 game.set_keyboard_binding(spgl.KEY_LEFT, player.move_left)
 game.set_keyboard_binding(spgl.KEY_RIGHT, player.move_right)
 game.set_keyboard_binding(spgl.KEY_ESCAPE, game.exit)
-turtle.onkey(player.turn_left, "Left")
 
 while True:
     # Call the game tick method
-    game.tick()
+	game.tick()
     
     # Check collisions
-    if game.is_collision(player, question1):
-    	print("QUESTION 1 COLLISION")
-    	answer = int(input("1 + 2 = "))
-    	if answer == 3:
-    		print ("CORRECT :)")
-    		question1.destroy()
-    	else:
-    		print ("WRONG :(")
+	if game.is_collision(player, question1):
+		print("QUESTION 1 COLLISION")
+		answer = int(input("1 + 2 = "))
+		if answer == 3:
+			print ("CORRECT :)")
+			question1.destroy()
+			player.score += 10
+			score_label.update("Score: {}".format(player.score))
+
+		else:
+			print ("WRONG :(")
+			player.score -= 10
+			score_label.update("Score: {}".format(player.score))
     		
-    elif game.is_collision(player, question2):
-    	print("QUESTION 2 COLLISION")
-    	answer = int(input("48 + 88 = "))
-    	if answer == 136:
-    		print ("CORRECT :)")
-    	else:
-    		print ("WRONG :(")
-    		
+	elif game.is_collision(player, question4):
+		print("QUESTION 4 COLLISION")
+		answer = int(input("18 * 3 = "))
+		if answer == 54:
+			print ("CORRECT :)")
+			question4.destroy()
+			player.score += 10
+			score_label.update("Score: {}".format(player.score))
+		else:
+			print ("WRONG :(")
+			player.score -= 10
+			score_label.update("Score: {}".format(player.score))
