@@ -23,34 +23,61 @@ class Player(spgl.Sprite):
 		self.score = 0
 		self.frame = 0
 		self.y_acceleration = 5
+		self.x_acceleration = 0
+		self.x_speed = 0
 		self.y_speed = 5
 		self.strength = 7
-		self.score
+		self.score = 0
 		self.state = "running"
         
 	def jump(self):
 		if self.state == "running":
 			self.y_acceleration += self.strength
-			self.sety(0)
+			self.sety(-100)
 			self.state = "jumping"
 	
 	def tick(self):
-		self.setx(self.xcor())
+		#Deal with x
+		self.x_speed += self.x_acceleration
+		if self.x_speed > 2:
+			self.x_speed = 2
+		elif self.x_speed < -2:
+			self.x_speed = -2
+			
+		self.setx(self.xcor() + self.x_speed)
+		self.move()
+		
+	def move(self):
+		self.fd(self.speed)
+			
+		if self.xcor() > game.SCREEN_WIDTH / 2:
+			self.goto(-game.SCREEN_WIDTH / 2, self.ycor())
+
+		if self.xcor() < -game.SCREEN_WIDTH /2 :
+			self.goto(game.SCREEN_WIDTH / 2, self.ycor())
+
+		if self.ycor() > game.SCREEN_HEIGHT / 2:
+			self.goto(self.xcor(), -game.SCREEN_HEIGHT / 2)
+
+		if self.ycor() < -game.SCREEN_HEIGHT / 2:
+			self.goto(self.xcor(), game.SCREEN_HEIGHT / 2)
+		
+		# Deal with y 
 		if self.ycor() < -100:
 			self.y_acceleration = 0
 			self.y_speed = 0
 			self.sety(-100)
 			self.state = "running"
-			
-		self.y_acceleration += game.gravity
-		self.y_speed += self.y_acceleration
-		self.sety(self.ycor() + self.y_speed)
+		else:
+			self.y_acceleration += game.gravity
+			self.y_speed += self.y_acceleration
+			self.sety(self.ycor() + self.y_speed)
 		    	
 	def move_left(self):
-		self.fd(-10)
+		self.x_acceleration -= 1
 		    	
 	def move_right(self):
-		self.fd(10)
+		self.x_acceleration += 1
     	
 	def exit(self):
 		pass
@@ -76,9 +103,11 @@ class Dog(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
 		self.speed = 0.5
-        
-	def tick(self):
+ 
+	def move(self):
 		self.fd(self.speed)
+		wn.ontimer(self.move, 100)
+
 		
 class Question(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
@@ -95,26 +124,28 @@ class House(spgl.Sprite):
 # Create Functions
 
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "The Math Quest", 0)
+game = spgl.Game(800, 450, "black", "The Math Quest", 0)
 game.gravity = -0.9
+game.set_background("full_background.gif")
 
 # Create Sprites
 # Create Person
-player = Player("triangle", "white", -300, 0)
-dog = Dog("turtle", "darkgoldenrod", -390, 0)
-question1 = Question("square", "yellow", -200, 10)
-question2 = Question("square", "yellow", -100, 70)
-question3 = Question("square", "yellow", 0, 30)
-question4 = Question("square", "yellow", 100, 0)
-question5 = Question("square", "yellow", 200, 40)
-question6 = Question("square", "yellow", 270, 50)
-gate = Gate("square", "dimgray", 300, 0)
+player = Player("Layer 12.gif", "white", -300, -100)
+player.questions_answered = 0
+dog = Dog("Dog.gif", "darkgoldenrod", -390, -120)
+question1 = Question("question_small.gif", "yellow", -200, -70)
+question2 = Question("question_small.gif", "yellow", -120, -10)
+question3 = Question("question_small.gif", "yellow", 0, 10)
+question4 = Question("question_small.gif", "yellow", 80, -50)
+question5 = Question("question_small.gif", "yellow", 150, 0)
+question6 = Question("question_small.gif", "yellow", 220, 20)
+gate = Gate("Gate.gif", "dimgray", 220, -60)
 gate.shapesize(5, 1, 0)
-house = House("square", "slategrey", 350, 0)
+house = House("house.gif", "slategrey", 350, -100)
 house.shapesize(4, 1.5, 0)
 
 # Create Labels
-score_label = spgl.Label("Score: 0", "white", -380, 280)
+score_label = spgl.Label("Score: 0", "black", -390, 200)
 
 # Create Buttons
 
@@ -124,29 +155,67 @@ game.set_keyboard_binding(spgl.KEY_LEFT, player.move_left)
 game.set_keyboard_binding(spgl.KEY_RIGHT, player.move_right)
 game.set_keyboard_binding(spgl.KEY_ESCAPE, game.exit)
 
+wn = spgl.turtle.Screen()
+wn.ontimer(dog.move, 200)
+
 while True:
+
+	print(player.state)
     # Call the game tick method
 	game.tick()
     
     # Check collisions
 	if game.is_collision(player, question1):
+		player.questions_answered += 1
 		print("QUESTION 1 COLLISION")
-		answer = int(input("1 + 2 = "))
-		if answer == 3:
+		num = wn.numinput("Question 1", "What is 1 + 2?")
+		print (num)
+		if num == 3:
 			print ("CORRECT :)")
 			question1.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
-
+		else:
+			print ("WRONG :(")
+			player.score -= 10
+			score_label.update("Score: {}".format(player.score))
+ 			
+	elif game.is_collision(player, question2):
+		player.questions_answered += 1
+		print("QUESTION 2 COLLISION")
+		num = root.numinput("Question 2", "What is 56 + 89?")
+		print (num)
+		if num == 145:
+			print ("CORRECT :)")
+			question2.destroy()
+			player.score += 10
+			score_label.update("Score: {}".format(player.score))
+		else:
+			print ("WRONG :(")
+			player.score -= 10
+			score_label.update("Score: {}".format(player.score))
+ 			
+	elif game.is_collision(player, question3):
+		player.questions_answered += 1
+		print("QUESTION 3 COLLISION")
+		num = root.numinput("Question 3", "What is 53 - 26?")
+		print (num)
+		if num == 27:
+			print ("CORRECT :)")
+			question3.destroy()
+			player.score += 10
+			score_label.update("Score: {}".format(player.score))
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
     		
 	elif game.is_collision(player, question4):
+		player.questions_answered += 1
 		print("QUESTION 4 COLLISION")
-		answer = int(input("18 * 3 = "))
-		if answer == 54:
+		num = root.numinput("Question 4", "What is 4 * 6?")
+		print (num)
+		if num == 24:
 			print ("CORRECT :)")
 			question4.destroy()
 			player.score += 10
@@ -155,3 +224,39 @@ while True:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
+			
+	elif game.is_collision(player, question5):
+		player.questions_answered += 1
+		print("QUESTION 5 COLLISION")
+		num = root.numinput("Question 5", "What is 18 * 3?")
+		print (num)
+		if num == 54:
+			print ("CORRECT :)")
+			question5.destroy()
+			player.score += 10
+			score_label.update("Score: {}".format(player.score))
+		else:
+			print ("WRONG :(")
+			player.score -= 10
+			score_label.update("Score: {}".format(player.score))
+			
+	elif game.is_collision(player, question6):
+		player.questions_answered += 1
+		print("QUESTION 6 COLLISION")
+		num = root.numinput("Question 6", "What is 144 / 3?")
+		print (num)
+		if num == 48:
+			print ("CORRECT :)")
+			question6.destroy()
+			player.score += 10
+			score_label.update("Score: {}".format(player.score))
+		else:
+			print ("WRONG :(")
+			player.score -= 10
+			score_label.update("Score: {}".format(player.score))
+
+	if game.is_collision(player, gate) and player.questions_answered == 6:
+		gate.sety(100)
+		
+	if game.is_collision(player, house):
+		exit()
