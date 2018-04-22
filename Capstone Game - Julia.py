@@ -29,6 +29,8 @@ class Player(spgl.Sprite):
 		self.strength = 7
 		self.score = 0
 		self.state = "running"
+		self.frame = 0
+		self.images = ["stickman1.gif", "stickman2.gif","stickman3.gif","stickman4.gif","stickman5.gif","stickman6.gif","stickman7.gif","stickman8.gif","stickman9.gif","stickman10.gif"]
         
 	def jump(self):
 		if self.state == "running":
@@ -46,6 +48,14 @@ class Player(spgl.Sprite):
 			
 		self.setx(self.xcor() + self.x_speed)
 		self.move()
+		
+		# Switch frames
+		current_image = self.images[self.frame]
+		self.set_image(current_image, 31, 40)
+		self.frame += 1
+		if self.frame == 10:
+			self.frame = 0
+		
 		
 	def move(self):
 		self.fd(self.speed)
@@ -74,10 +84,10 @@ class Player(spgl.Sprite):
 			self.sety(self.ycor() + self.y_speed)
 		    	
 	def move_left(self):
-		self.x_acceleration -= 1
+		self.x_speed = -1
 		    	
 	def move_right(self):
-		self.x_acceleration += 1
+		self.x_speed = 1
     	
 	def exit(self):
 		pass
@@ -150,26 +160,30 @@ score_label = spgl.Label("Score: 0", "black", -390, 200)
 # Create Buttons
 
 # Set Keyboard Bindings
-game.set_keyboard_binding(spgl.KEY_SPACE, player.jump)
-game.set_keyboard_binding(spgl.KEY_LEFT, player.move_left)
-game.set_keyboard_binding(spgl.KEY_RIGHT, player.move_right)
-game.set_keyboard_binding(spgl.KEY_ESCAPE, game.exit)
+def set_keyboard_bindings():
+	wn = spgl.turtle.Screen()
+	game.set_keyboard_binding(spgl.KEY_SPACE, player.jump)
+	game.set_keyboard_binding(spgl.KEY_LEFT, player.move_left)
+	game.set_keyboard_binding(spgl.KEY_RIGHT, player.move_right)
+	game.set_keyboard_binding(spgl.KEY_ESCAPE, game.exit)
+
+set_keyboard_bindings()
 
 wn = spgl.turtle.Screen()
 wn.ontimer(dog.move, 200)
 
 while True:
-
+	
 	print(player.state)
     # Call the game tick method
 	game.tick()
+	set_keyboard_bindings()
     
     # Check collisions
 	if game.is_collision(player, question1):
 		player.questions_answered += 1
 		print("QUESTION 1 COLLISION")
 		num = wn.numinput("Question 1", "What is 1 + 2?")
-		print (num)
 		if num == 3:
 			print ("CORRECT :)")
 			question1.destroy()
@@ -210,7 +224,7 @@ while True:
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
     		
-	elif game.is_collision(player, question4):
+	if game.is_collision(player, question4):
 		player.questions_answered += 1
 		print("QUESTION 4 COLLISION")
 		num = root.numinput("Question 4", "What is 4 * 6?")
@@ -225,7 +239,7 @@ while True:
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
 			
-	elif game.is_collision(player, question5):
+	if game.is_collision(player, question5):
 		player.questions_answered += 1
 		print("QUESTION 5 COLLISION")
 		num = root.numinput("Question 5", "What is 18 * 3?")
@@ -240,7 +254,7 @@ while True:
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
 			
-	elif game.is_collision(player, question6):
+	if game.is_collision(player, question6):
 		player.questions_answered += 1
 		print("QUESTION 6 COLLISION")
 		num = root.numinput("Question 6", "What is 144 / 3?")
