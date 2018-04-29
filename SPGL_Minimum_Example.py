@@ -34,7 +34,11 @@ class Question(spgl.Sprite):
         
 class Gate(spgl.Sprite):
     def __init__(self, shape, color, x, y):
-        spgl.Sprite.__init__(self, shape, color, x, y)     
+        spgl.Sprite.__init__(self, shape, color, x, y) 
+        
+class House(spgl.Sprite):
+	def __init__(self, shape, color, x, y):
+		spgl.Sprite.__init__(self, shape, color, x, y)    
 # Create Functions
 
 # Initial Game setup
@@ -45,9 +49,15 @@ game = spgl.Game(800, 600, "black", "The Math Quest", 0)
 player = Player("triangle", "white", -300, 0)
 dog = Dog("turtle", "darkgoldenrod", -390, 0)
 question = Question("square", "yellow", -200, 10)
+question = Question("square", "yellow", -100, 70)
+question = Question("square", "yellow", 0, 30)
+question = Question("square", "yellow", 100, 0)
+question = Question("square", "yellow", 200, 40)
+question = Question("square", "yellow", 270, 50)
 gate = Gate("square", "dimgray", 300, 0)
 gate.shapesize(5, 1, 0)
-
+house = House("square", "slategrey", 350, 0)
+house.shapesize(4, 2, 0)
 # Create Labels
 
 # Create Buttons

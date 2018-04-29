@@ -8,6 +8,7 @@ import spgl
 import turtle 
 import random
 import math
+import time
 
 class Game(turtle.Turtle):
 	pass
@@ -30,8 +31,9 @@ class Player(spgl.Sprite):
 		self.score = 0
 		self.state = "running"
 		self.frame = 0
-		self.images = ["stickman1.gif", "stickman2.gif","stickman3.gif","stickman4.gif","stickman5.gif","stickman6.gif","stickman7.gif","stickman8.gif","stickman9.gif","stickman10.gif"]
-        
+		self.images_right = ["stickman1.gif", "stickman2.gif","stickman3.gif","stickman4.gif","stickman5.gif","stickman6.gif","stickman7.gif","stickman8.gif","stickman9.gif","stickman10.gif"]
+		self.images_left = ["stickman1_left.gif", "stickman2_left.gif","stickman3_left.gif","stickman4_left.gif","stickman5_left.gif","stickman6_left.gif","stickman7_left.gif","stickman8_left.gif","stickman9_left.gif","stickman10_left.gif"]
+	
 	def jump(self):
 		if self.state == "running":
 			self.y_acceleration += self.strength
@@ -39,22 +41,22 @@ class Player(spgl.Sprite):
 			self.state = "jumping"
 	
 	def tick(self):
-		#Deal with x
-		self.x_speed += self.x_acceleration
-		if self.x_speed > 2:
-			self.x_speed = 2
-		elif self.x_speed < -2:
-			self.x_speed = -2
-			
 		self.setx(self.xcor() + self.x_speed)
 		self.move()
 		
 		# Switch frames
-		current_image = self.images[self.frame]
-		self.set_image(current_image, 31, 40)
-		self.frame += 1
-		if self.frame == 10:
-			self.frame = 0
+		if self.x_speed >= 0:
+			current_image = self.images_right[self.frame]
+			self.set_image(current_image, 31, 40)
+			self.frame += 1
+			if self.frame == 10:
+				self.frame = 0
+		else:
+			current_image = self.images_left[self.frame]
+			self.set_image(current_image, 31, 40)
+			self.frame += 1
+			if self.frame == 10:
+				self.frame = 0
 		
 		
 	def move(self):
@@ -84,13 +86,13 @@ class Player(spgl.Sprite):
 			self.sety(self.ycor() + self.y_speed)
 		    	
 	def move_left(self):
-		self.x_speed = -1
+		self.x_speed = -3
 		    	
 	def move_right(self):
-		self.x_speed = 1
+		self.x_speed = 3
     	
 	def exit(self):
-		pass
+		exit()
 		
 	#def is_collision(self, sprite_1, sprite_2):
         # Axis Aligned Bounding Box
@@ -112,13 +114,12 @@ class Player(spgl.Sprite):
 class Dog(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
-		self.speed = 0.5
+		self.speed = 1.0
  
 	def move(self):
 		self.fd(self.speed)
 		wn.ontimer(self.move, 100)
 
-		
 class Question(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
@@ -134,9 +135,10 @@ class House(spgl.Sprite):
 # Create Functions
 
 # Initial Game setup
-game = spgl.Game(800, 450, "black", "The Math Quest", 0)
+game = spgl.Game(800, 450, "black", "Math Dash", 5)
 game.gravity = -0.9
 game.set_background("full_background.gif")
+game.play_sound("pac_man.wav -v 0.6", 7) # Repeat every 7 seconds
 
 # Create Sprites
 # Create Person
@@ -149,10 +151,10 @@ question3 = Question("question_small.gif", "yellow", 0, 10)
 question4 = Question("question_small.gif", "yellow", 80, -50)
 question5 = Question("question_small.gif", "yellow", 150, 0)
 question6 = Question("question_small.gif", "yellow", 220, 20)
-gate = Gate("Gate.gif", "dimgray", 220, -60)
-gate.shapesize(5, 1, 0)
+gate = Gate("Gate.gif", "dimgray", 275, -115)
+gate.set_image("Gate.gif", 93, 82)
 house = House("house.gif", "slategrey", 350, -100)
-house.shapesize(4, 1.5, 0)
+house.set_image("house.gif", 157, 100)
 
 # Create Labels
 score_label = spgl.Label("Score: 0", "black", -390, 200)
@@ -189,88 +191,148 @@ while True:
 			question1.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
+			gate.sety(gate.ycor() + 10)
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
+		spgl.turtle.listen()
  			
 	elif game.is_collision(player, question2):
 		player.questions_answered += 1
 		print("QUESTION 2 COLLISION")
-		num = root.numinput("Question 2", "What is 56 + 89?")
+		num = wn.numinput("Question 2", "What is 56 + 89?")
 		print (num)
 		if num == 145:
 			print ("CORRECT :)")
 			question2.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
+			gate.sety(gate.ycor() + 10)
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
- 			
+		spgl.turtle.listen()
+ 	
 	elif game.is_collision(player, question3):
 		player.questions_answered += 1
 		print("QUESTION 3 COLLISION")
-		num = root.numinput("Question 3", "What is 53 - 26?")
+		num = wn.numinput("Question 3", "What is 53 - 26?")
 		print (num)
 		if num == 27:
 			print ("CORRECT :)")
 			question3.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
+			gate.sety(gate.ycor() + 10)
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
-    		
+		spgl.turtle.listen()
+
 	if game.is_collision(player, question4):
 		player.questions_answered += 1
 		print("QUESTION 4 COLLISION")
-		num = root.numinput("Question 4", "What is 4 * 6?")
+		num = wn.numinput("Question 4", "What is 4 * 6?")
 		print (num)
 		if num == 24:
 			print ("CORRECT :)")
 			question4.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
+			gate.sety(gate.ycor() + 10)
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
-			
+		spgl.turtle.listen()
+
 	if game.is_collision(player, question5):
 		player.questions_answered += 1
 		print("QUESTION 5 COLLISION")
-		num = root.numinput("Question 5", "What is 18 * 3?")
+		num = wn.numinput("Question 5", "What is 18 * 3?")
 		print (num)
 		if num == 54:
 			print ("CORRECT :)")
 			question5.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
+			gate.sety(gate.ycor() + 10)
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
-			
+		spgl.turtle.listen()
+
 	if game.is_collision(player, question6):
 		player.questions_answered += 1
 		print("QUESTION 6 COLLISION")
-		num = root.numinput("Question 6", "What is 144 / 3?")
+		num = wn.numinput("Question 6", "What is 144 / 3?")
 		print (num)
 		if num == 48:
 			print ("CORRECT :)")
 			question6.destroy()
 			player.score += 10
 			score_label.update("Score: {}".format(player.score))
+			gate.sety(gate.ycor() + 10)
 		else:
 			print ("WRONG :(")
 			player.score -= 10
 			score_label.update("Score: {}".format(player.score))
+		spgl.turtle.listen()
 
 	if game.is_collision(player, gate) and player.questions_answered == 6:
 		gate.sety(100)
 		
+	if game.is_collision(player, gate):
+		player.move_left()
+		
+	if game.is_collision(player, dog):
+		player.destroy()
+		dog.destroy()
+		question1.destroy()
+		question2.destroy()
+		question3.destroy()
+		question4.destroy()
+		question5.destroy()
+		question6.destroy()
+		gate.destroy()
+		house.destroy()
+		game.set_background("player_dog_end.gif")
+		game.tick()
+		time.sleep(3)
+		game.exit() 
+		
+	if game.is_collision(dog, house):
+		player.destroy()
+		dog.destroy()
+		question1.destroy()
+		question2.destroy()
+		question3.destroy()
+		question4.destroy()
+		question5.destroy()
+		question6.destroy()
+		gate.destroy()
+		house.destroy()
+		game.set_background("dog_house_end.gif")
+		game.tick()
+		time.sleep(3)
+		game.exit() 
+		
 	if game.is_collision(player, house):
-		exit()
+		player.destroy()
+		dog.destroy()
+		question1.destroy()
+		question2.destroy()
+		question3.destroy()
+		question4.destroy()
+		question5.destroy()
+		question6.destroy()
+		gate.destroy()
+		house.destroy()
+		game.set_background("player_house_end.gif")
+		game.tick()
+		time.sleep(3)
+		game.exit() 
