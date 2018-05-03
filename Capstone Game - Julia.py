@@ -58,7 +58,6 @@ class Player(spgl.Sprite):
 			if self.frame == 10:
 				self.frame = 0
 		
-		
 	def move(self):
 		self.fd(self.speed)
 			
